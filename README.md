@@ -30,8 +30,6 @@ Também é possível gerar um WAV sintetizado a partir das frequências detectad
 
 ## Fluxo do processamento
 
-O processamento principal funciona desta forma:
-
 ```text
 .mp3 / .mp4 / .wav
         │
@@ -169,6 +167,8 @@ python_limiar=0.5
 python_top_n=5
 python_tolerancia_hz=30
 ```
+
+---
 
 ## Sample rate
 
@@ -404,20 +404,24 @@ os slots são:
 1 → 2 → 3 → 4 → 5
 ```
 
-A ideia utilizada posteriormente no processamento das notas é procurar o próximo som quando o atual estiver zerado.
+A lógica utilizada posteriormente no processamento das notas procura o próximo som quando o atual estiver zerado.
 
 Exemplo:
 
 ```text
-som 1 = 0
-        ↓
-procura som 2
-        ↓
-som 2 = 0
-        ↓
-procura som 3
-        ↓
-som 3 = 150
+começa o loop
+    │
+    ├── som 1 = 0
+    │       ↓
+    │   procura som 2
+    │
+    ├── som 2 = 0
+    │       ↓
+    │   procura som 3
+    │
+    ├── som 3 = 150
+    │
+    └── fim do loop
 ```
 
 Resultado:
@@ -426,19 +430,41 @@ Resultado:
 150
 ```
 
-Se todos estiverem zerados:
+No próximo bloco, a procura continua a partir do próximo slot:
 
 ```text
-som 1 = 0
-som 2 = 0
-som 3 = 0
-som 4 = 0
-som 5 = 0
+começa novo loop
+    │
+    ├── som 4 = 0
+    │       ↓
+    │   procura som 5
+    │
+    ├── som 5 = 0
+    │       ↓
+    │   procura som 1
+    │
+    ├── som 1 = 0
+    │       ↓
+    │   procura som 2
+    │
+    ├── som 2 = 0
+    │       ↓
+    │   procura som 3
+    │
+    ├── som 3 = 0
+    │
+    └── fim do loop
 ```
 
-a procura retorna ao primeiro slot.
+A procura utiliza os slots de forma circular:
 
-Essa lógica é utilizada para evitar que um bloco com vários slots vazios seja tratado como uma frequência válida.
+```text
+1 → 2 → 3 → 4 → 5 → 1 → 2 → ...
+```
+
+Isso permite continuar a procura sem ficar preso em um único slot.
+
+Se todos os sons estiverem em `0`, a procura termina sem encontrar uma frequência válida.
 
 ---
 
@@ -494,13 +520,7 @@ Depois execute:
 ./run.sh
 ```
 
-O `run.sh` executa:
-
-```bash
-./main.sh
-./notas_para_grub.sh
-./notas_para_wav.sh
-```
+O `run.sh` executa as etapas necessárias do processamento.
 
 ---
 
@@ -550,7 +570,6 @@ overlap
 limiar
 top_n
 tolerancia_hz
-awk_hz_max
 ```
 
 Exemplo:
@@ -565,8 +584,7 @@ saida \
 50 \
 0.5 \
 5 \
-30 \
-1200
+30
 ```
 
 Ele gera:
@@ -615,7 +633,6 @@ Exemplo:
 ```text
 # tempo_bloco=0.050000
 # top_n=5
-# awk_hz_max=1200.00
 
 130.00 50.00 150.00 0.00 0.00
 0.00 60.00 0.00 0.00 0.00
@@ -721,18 +738,9 @@ O script utiliza:
 SoX
 ```
 
-Para frequências abaixo de `40 Hz`, é gerado silêncio:
+Para frequências abaixo de `40 Hz`, é gerado silêncio.
 
-```bash
-if [ "$freq" -lt 40 ]; then
-    sox -n ... trim 0 "$tempo"
-```
-
-Para frequências a partir de `40 Hz`, é sintetizada uma onda quadrada:
-
-```bash
-sox -n ... synth "$tempo" square "$freq"
-```
+Para frequências a partir de `40 Hz`, é sintetizada uma onda quadrada.
 
 Os blocos são posteriormente concatenados em um único WAV.
 
@@ -819,6 +827,20 @@ são utilizados temporariamente pelo `notas_para_wav.sh`.
 
 ---
 
+# Website — Visualizador de Notas Musicais
+
+O projeto também possui um **Website criado com auxílio do Manus**, utilizado como ferramenta para visualizar os resultados da análise.
+
+O visualizador permite:
+
+* visualizar as notas;
+* visualizar a sequência das notas;
+* fazer download dos resultados.
+
+O Website funciona como uma ferramenta complementar ao processamento realizado pelos scripts.
+
+---
+
 # Resumo
 
 O projeto realiza:
@@ -857,7 +879,7 @@ WAV sintetizado
 
 ---
 
-## Desenvolvimento
+# Desenvolvimento
 
 Este projeto foi desenvolvido através de diferentes versões e experimentos.
 
@@ -889,7 +911,7 @@ Desenvolvimento e testes realizados com auxílio de:
 
 ---
 
-## Observação
+# Observação
 
 Os valores de:
 
@@ -904,4 +926,26 @@ awk_hz_max
 
 podem alterar significativamente o resultado da análise.
 
-Em especial, o `python_limiar` influencia diretamente quais frequências são consideradas pelo STFT.
+Em especial, o:
+
+```bash
+python_limiar
+```
+
+influencia diretamente quais frequências são consideradas pelo STFT.
+
+Durante os testes, foi observado que um limiar muito alto, como:
+
+```bash
+python_limiar=5.0
+```
+
+pode fazer com que muitos blocos não apresentem frequências detectadas.
+
+Por isso, a configuração atualmente utilizada é:
+
+```bash
+python_limiar=0.5
+python_top_n=5
+python_tolerancia_hz=30
+```
