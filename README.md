@@ -827,17 +827,19 @@ são utilizados temporariamente pelo `notas_para_wav.sh`.
 
 ---
 
-# Website — Visualizador de Notas Musicais
+## 🌐 Website — Visualizador de Notas Musicais
 
-O projeto também possui um **Website criado com auxílio do Manus**, utilizado como ferramenta para visualizar os resultados da análise.
+O projeto também possui um Website criado com auxílio do Manus para visualizar os resultados da análise.
+
+👉 **[Abrir Visualizador de Notas Musicais](https://notewiz-y4mzpsb5.manus.space)**
 
 O visualizador permite:
 
-* visualizar as notas;
-* visualizar a sequência das notas;
-* fazer download dos resultados.
+- visualizar as notas;
+- visualizar a sequência das notas;
+- fazer download dos resultados.
 
-O Website funciona como uma ferramenta complementar ao processamento realizado pelos scripts.
+Website desenvolvido com auxílio do Manus.
 
 ---
 
