@@ -136,6 +136,27 @@ from scipy.signal import stft, istft
 
 Portanto, é necessário ter **NumPy** e **SciPy** instalados.
 
+Download **NumPy** e **SciPy**
+
+```bash
+pip install numpy scipy
+```
+ou
+```bash
+sudo apt install python3-numpy python3-scipy
+
+```
+
+Download sox
+```bash
+sudo apt install sox libsox-fmt-all
+```
+
+Download ffmpeg
+```bash
+sudo apt install ffmpeg
+```
+
 ---
 
 # Configuração
