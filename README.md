@@ -972,3 +972,24 @@ python_limiar=0.5
 python_top_n=5
 python_tolerancia_hz=30
 ```
+
+---
+#
+
+Exemplo:
+
+```text
+começa o loop
+    │
+    ├── som 1 = 0
+    │       ↓
+    │   procura som 5
+    │
+    ├── som 5 = 0
+    │       ↓
+    │   procura som 4
+    │
+    ├── som 4 = 150
+    │
+    └── fim do loop
+```
